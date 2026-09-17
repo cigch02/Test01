@@ -31,5 +31,14 @@ namespace API.Mapping
                 StockId = stockid
             };
         } 
+        public static Comment ToUpdateCommentDto(this  UpdateCommentDto UpdateCommentModel)
+        {
+            return new Comment
+            {
+                Title = UpdateCommentModel.Title,
+                Content = UpdateCommentModel.Content,
+            };
+        } 
+
     }
 }
