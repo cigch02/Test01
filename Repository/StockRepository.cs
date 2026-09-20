@@ -7,6 +7,7 @@ using API.Data;
 using API.DTOs;
 using API.Interfaces;
 using API.Models;
+using API.Query;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Repository
@@ -44,9 +45,28 @@ namespace API.Repository
             return stock;
         }
 
-        public async Task<List<Stock>> GetAllAsync()
+        public async Task<List<Stock>> GetAllAsync(QueryObject query)
         {
-            return  await _context.Stock.Include(c => c.Comment).ToListAsync();
+            var stock =  _context.Stock.Include(c => c.Comment).AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(query.CompanyName))
+                stock = stock.Where(s => s.CompanyName.Contains(query.CompanyName));
+            
+            if(!string.IsNullOrWhiteSpace(query.Symbol))
+                stock = stock.Where(s => s.Symbol.Contains(query.Symbol));
+            
+            if(!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                if(query.SortBy.Equals("Symbol", StringComparison.OrdinalIgnoreCase))
+                {
+                    stock = query.IsDecsending ? stock.OrderByDescending(s => s.Symbol) : stock.OrderBy(s => s.Symbol);
+                }
+            }
+
+            var skipNumber = (query.PageNumber-1) * query.PageSize;
+            
+
+            return await stock.Skip(skipNumber).Take(query.PageSize).ToListAsync();
         }
 
         public async Task<Stock?> GetByIdAsync(int id)

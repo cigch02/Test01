@@ -10,6 +10,7 @@ using API.Models;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using API.Interfaces;
+using API.Query;
 
 namespace API.Controllers
 {
@@ -26,12 +27,13 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
+            
             if(!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var stock = await _stockRepository.GetAllAsync();
+            var stock = await _stockRepository.GetAllAsync(query);
 
             var stockDTo = stock.Select(s => s.ToStockDto());
 
